@@ -20,7 +20,7 @@
 #include "arbitratd-filters.h"
 #include "arbitratd-poll.h"
 #include "arbitratd-fork.h"
-#include "arbitratd-comlang.h"
+#include "arbitratd-messaging.h"
 
 typedef struct servinfo
 {

@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#define STALE_SOCKET  20
+#define STALE_SOCKET  60
 
 int un_sock_init(const char *path)
 {

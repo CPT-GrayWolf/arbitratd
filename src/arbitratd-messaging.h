@@ -31,5 +31,5 @@
 #define ERR_RECOVERED   'e'
 #define ERR_FAILED      'E'
 
-int m_read(int fd, char **data);
-int m_write(int fd, int ind, const char *data);
+int32_t m_read(int fd, char **data);
+int32_t m_write(int fd, int32_t ind, const char *data);

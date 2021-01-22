@@ -21,7 +21,7 @@
 #include "arbitratd-poll.h"
 #include "arbitratd-fork.h"
 #include "arbitratd-server.h"
-#include "arbitratd-comlang.h"
+#include "arbitratd-messaging.h"
 #include <pthread.h>
 #include <ctype.h>
 
@@ -163,6 +163,7 @@ void *socket_thread(void *arg)
 							free(tmp);
 						}
 						printf("Recieved \'%c\' from %lu with data:\n%s\n", readstat, this_client->id, buff);
+						m_write(this_client->fd, CON_READY, NULL);
 					}
 				}
 
@@ -283,7 +284,7 @@ int main(int argc, char **argv, char **envp)
 		selected->controller_pid = pfork(&selected->control_pipe);
 		if(selected->controller_pid < 0)
 		{
-			fprintf(stderr, "%s: Failed to fork controller!", self.name);
+			fprintf(stderr, "%s: Failed to fork controller!\n", self.name);
 			return 1;
 		}
 		else if(selected->controller_pid == 0)
@@ -291,7 +292,7 @@ int main(int argc, char **argv, char **envp)
 			//execle("/usr/sbin/arb-uc", "arb-uc", selected->domain_config_path, NULL, envp);
 			execle("./arb-uc", "arb-uc", selected->domain_config_path, NULL, envp);
 
-			fprintf(stderr, "Failed to exec controller!");
+			fprintf(stderr, "Failed to exec controller!\n");
 			return 1;
 		}
 
@@ -315,6 +316,7 @@ int main(int argc, char **argv, char **envp)
 	while(self.domains != NULL)
 	{
 		ready = poll(self.polls.poll_array, self.polls.count, -1);
+		pthread_sigmask(SIG_BLOCK, &c_set, &o_set);
 
 		for(int i = 0; i < self.polls.count && ready > 0; i++)
 		{
@@ -330,11 +332,11 @@ int main(int argc, char **argv, char **envp)
 						tmp->name = buff;
 						buff = NULL;
 					}
-					else if(readstat == INFO_SERVICE)
+					else if(readstat == INFO_SERVICE && buff != NULL)
 					{
 						if(!isdigit(buff[0]) || buff[5] != '@')
 						{
-							fprintf(stderr, "Bad service id recieved in domain %s", tmp->name);
+							fprintf(stderr, "Bad service id recieved in domain %s\n", tmp->name);
 							kill(tmp->controller_pid, SIGTERM);
 							break;
 						}
@@ -345,7 +347,7 @@ int main(int argc, char **argv, char **envp)
 
 						if(service_id_get(new_id, tmp) != NULL)
 						{
-							fprintf(stderr, "Duplicate service id recieved in domain %s", tmp->name);
+							fprintf(stderr, "Duplicate service id recieved in domain %s\n", tmp->name);
 							kill(tmp->controller_pid, SIGTERM);
 							break;
 						}
@@ -361,10 +363,9 @@ int main(int argc, char **argv, char **envp)
 
 						printf("New service %s with ID %05d in domain %s\n", new_name, new_id, tmp->name);
 					}
-					else if(readstat == INFO_MESSAGE)
+					else if(readstat == INFO_MESSAGE && buff != NULL)
 					{
-						if(buff != NULL)
-							write(STDOUT_FILENO, buff + 5, strlen(buff + 5) + 1);
+						write(STDOUT_FILENO, buff + 5, strlen(buff + 5) + 1);
 
 						char srvstr[6];
 						strncpy(srvstr, buff, 5);
@@ -378,12 +379,12 @@ int main(int argc, char **argv, char **envp)
 								m_write(service->clients[i], INFO_MESSAGE, buff + 5);
 						}
 					}
-					else if(readstat != '\0')
+					else if(readstat != '\0' && readstat != INFO_MESSAGE)
 					{
 						if(buff != NULL)
-							fprintf(stderr, "Unexpected message \"%s\" from %s", buff, tmp->name);
+							fprintf(stderr, "Unexpected message \"%s\" from %s\n", buff, tmp->name);
 						else
-							fprintf(stderr, "Unexpected message \'%c\' from %s", readstat, tmp->name);
+							fprintf(stderr, "Unexpected message \'%c\' from %s\n", readstat, tmp->name);
 					}
 				}
 
@@ -391,5 +392,7 @@ int main(int argc, char **argv, char **envp)
 				ready--;
 			}
 		}
+
+		pthread_sigmask(SIG_SETMASK, &o_set, NULL);
 	}
 }

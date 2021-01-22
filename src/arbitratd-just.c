@@ -18,7 +18,7 @@
 
 #include "arbitratd-common.h"
 #include "arbitratd-client.h"
-#include "arbitratd-comlang.h"
+#include "arbitratd-messaging.h"
 
 #ifdef LINUX
 #define OPTS "+fs:"
@@ -105,9 +105,14 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	char *buff = NULL;
+
 	m_write(server_fd, INFO_DOMAIN, self.domain);
+	m_read(server_fd, &buff);
 
 	m_write(server_fd, INFO_SERVICE, self.service);
+	m_read(server_fd, &buff);
 
 	m_write(server_fd, INFO_MESSAGE, self.message);
+	m_read(server_fd, &buff);
 }
