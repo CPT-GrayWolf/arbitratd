@@ -6,3 +6,5 @@
 ## The Arbitratd Service Management Interface
 
 Abitratd is intended to become a modular interface for managing and automating services on UNIX like systems.
+
+###### This software depends on [libreadconf](https://github.com/CPT-GrayWolf/libreadconf) to load its configuration files.
