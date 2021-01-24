@@ -101,7 +101,9 @@ void *socket_thread(void *arg)
 
 					client_o *this_client = client_fd_get(clients.poll_array[i].fd, self.clients);
 
-					if(readstat == CON_READY)
+					if(this_client == NULL)
+						continue;
+					else if(readstat == CON_READY)
 					{
 						this_client->status = CON_READY;
 						printf("Recieved \"ready\" from %lu\n", this_client->id);

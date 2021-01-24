@@ -84,7 +84,7 @@ int32_t m_read(int fd, char **data)
 					delay.tv_nsec = i * 100000000L;
 					nanosleep(&delay, NULL);
 					if(total > 0)
-						readstat = read(fd, ((char *)&ind) + (total - 1), sizeof(int32_t) - total);
+						readstat = read(fd, ((char *)&ind) + (total), sizeof(int32_t) - total);
 					else
 						readstat = read(fd, &ind, sizeof(int32_t));
 				}
@@ -115,7 +115,7 @@ int32_t m_read(int fd, char **data)
 						delay.tv_nsec = i * 100000000L;
 						nanosleep(&delay, NULL);
 						if(total > 0)
-							readstat = read(fd, tmp + (total - 1), ind - total);
+							readstat = read(fd, tmp + (total), ind - total);
 						else
 							readstat = read(fd, tmp, ind);
 					}
@@ -225,7 +225,7 @@ int32_t m_write(int fd, int32_t ind, const char *data)
 					delay.tv_nsec = i * 100000000L;
 					nanosleep(&delay, NULL);
 					if(total > 0)
-						writestat = write(fd, ((char *)&len_ind) + (total - 1), sizeof(int32_t) - total);
+						writestat = write(fd, ((char *)&len_ind) + (total), sizeof(int32_t) - total);
 					else
 						writestat = write(fd, &len_ind, sizeof(int32_t));
 				}
@@ -250,7 +250,7 @@ int32_t m_write(int fd, int32_t ind, const char *data)
 						delay.tv_nsec = i * 100000000L;
 						nanosleep(&delay, NULL);
 						if(total > 0)
-							writestat = write(fd, data + (total - 1), len - total);
+							writestat = write(fd, data + (total), len - total);
 						else
 							writestat = write(fd, data, len);
 					}

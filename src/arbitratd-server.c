@@ -171,6 +171,7 @@ int client_add(client_list **restrict list, client_o *restrict item)
 	fail:
 
 		free(new_item);
+		new_item = NULL;
 		return 0;
 }
 
@@ -195,9 +196,12 @@ void client_free(c_id which, client_list **restrict list)
 			return;
 	}
 	
+	if(current_item->domain != NULL)
+		free(current_item->domain);
 	free(current_item);
 
-	list_free(&current);
+	if(list_free(&current))
+		*list = current;
 
 	return;
 }
@@ -245,7 +249,7 @@ client_o *client_id_get(c_id which, client_list *restrict list)
 	while(current_item->id != which)
 	{
 		current = next;
-		if(current != NULL)
+		if(current != NULL && current->item != NULL)
 		{
 			current_item = current->item;
 			next = current->next;
@@ -272,7 +276,7 @@ client_o *client_fd_get(int which, client_list *restrict list)
 	while(current_item->fd != which)
 	{
 		current = next;
-		if(current != NULL)
+		if(current != NULL && current->item != NULL)
 		{
 			current_item = current->item;
 			next = current->next;

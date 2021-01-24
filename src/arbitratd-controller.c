@@ -69,6 +69,10 @@ int main(int argc, char **argv, char **envp)
 	setvbuf(stdout, NULL, _IOLBF, 0);
 	setvbuf(stderr, NULL, _IOLBF, 0);
 
+	struct sigaction signore;
+	signore.sa_handler = SIG_IGN;
+	sigaction(SIGINT, &signore, NULL);
+
 	char errbuff[128];
 
 	CONFIG *init_config;
@@ -286,6 +290,8 @@ int main(int argc, char **argv, char **envp)
 				strncpy(sbuff, service.id, 5);
 				m_write(STDOUT_FILENO, INFO_MESSAGE, sbuff);
 			}
+
+			errno = 0;
 
 			sbuff[5] = '\0';
 		}
